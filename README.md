@@ -384,7 +384,7 @@ Ejecuta los scripts en `sql/04_ml/`:
 ## 📧 Contacto
 
 - Portfolio: [anabmo.github.io/churn-prediction-mlops](https://anabmo.github.io/churn-prediction-mlops/)
-- LinkedIn: [linkedin.com/in/tu-perfil](www.linkedin.com/in/anabmo)
+- LinkedIn: [linkedin.com/in/anabmo](www.linkedin.com/in/anabmo)
 - GitHub: [@AnaBMo](https://github.com/AnaBMo)
 
 ---
