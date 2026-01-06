@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Proyecto MLOps End-to-End: Predicción de fuga de clientes usando BigQuery ML, XGBoost y K-Means">
+    <meta name="author" content="Ana Morales">
+    <title>Predicción de Churn - Proyecto MLOps | Ana Morales</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #5f9ea0;      /* Cadet Blue */
+            --secondary-color: #ffb6c1;    /* Rosa Pastel (Light Pink) */
+            --success-color: #98d8c8;      /* Verde agua suave */
+            --dark-color: #2c3e50;
+            --light-bg: #fef5f8;           /* Rosa muy claro de fondo */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero .lead {
+            font-size: 1.3rem;
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Badges */
+        .tech-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Section Styling */
+        section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .bg-light-custom {
+            background-color: var(--light-bg);
+        }
+        
+        /* Architecture Diagram */
+        .architecture-flow {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+        
+        .architecture-step {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .architecture-step:hover {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* Dashboard Embed */
+        .dashboard-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            margin-bottom: 3rem;
+        }
+        
+        .dashboard-embed {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 10px;
+        }
+        
+        /* Results Grid */
+        .result-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-card h4 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Eliminar bullets de listas */
+        .result-card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .result-card ul li {
+            padding: 0.5rem 0;
+            padding-left: 0;
+        }
+        
+        /* Code Section */
+        .code-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--dark-color);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .code-link:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .code-link i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 2rem;
+        }
+        
+        footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            color: white;
+        }
+
+        footer .sign{
+            color: #5f9ea0;
+            font-size: small;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero .lead {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container text-center position-relative">
+            <h1>Predicción de Churn de Clientes</h1>
+            <p class="lead">
+                Proyecto MLOps End-to-End: Arquitectura Medallion, Machine Learning y Visualización de Datos
+            </p>
+            <div class="mt-4">
+                <span class="tech-badge"><i class="bi bi-cloud"></i> Google Cloud Platform</span>
+                <span class="tech-badge"><i class="bi bi-database"></i> BigQuery ML</span>
+                <span class="tech-badge"><i class="bi bi-diagram-3"></i> XGBoost</span>
+                <span class="tech-badge"><i class="bi bi-diagram-2"></i> K-Means</span>
+                <span class="tech-badge"><i class="bi bi-bar-chart"></i> Looker Studio</span>
+                <span class="tech-badge"><i class="bi bi-code-slash"></i> Python</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5" style="margin-top: -50px;">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <div class="stat-number">77.5%</div>
+                        <div class="stat-label">ROC-AUC Score</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <div class="stat-number">81.2%</div>
+                        <div class="stat-label">F1-Score</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <div class="stat-number">4,876</div>
+                        <div class="stat-label">Clientes Analizados</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Segmentos Identificados</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resumen del Proyecto -->
+    <section id="resumen">
+        <div class="container">
+            <h2 class="section-title text-center">Resumen del Proyecto</h2>
+            <p class="section-subtitle text-center">
+                Sistema completo de predicción de churn y segmentación de clientes para el sector retail tecnológico
+            </p>
+            
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="result-card">
+                        <h4><i class="bi bi-bullseye"></i> Objetivo</h4>
+                        <p>Predecir qué clientes están en riesgo de abandonar (churn) y segmentarlos en grupos accionables para estrategias de retención personalizadas.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="result-card">
+                        <h4><i class="bi bi-database-fill"></i> Datos</h4>
+                        <p>5,000 clientes sintéticos, 26,674 transacciones en 2 años, con patrones realistas de comportamiento de compra y churn.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="result-card">
+                        <h4><i class="bi bi-cpu"></i> Tecnología</h4>
+                        <p>Arquitectura Medallion en BigQuery, modelos ML (XGBoost + K-Means) y dashboards interactivos en Looker Studio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Arquitectura -->
+    <section id="arquitectura" class="bg-light-custom">
+        <div class="container">
+            <h2 class="section-title text-center">Arquitectura Medallion</h2>
+            <p class="section-subtitle text-center">
+                Pipeline de datos organizado en tres capas: Bronze (datos crudos), Silver (datos limpios) y Gold (features para ML)
+            </p>
+            
+            <div class="architecture-flow">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="architecture-step">
+                            <h5>Cloud Storage</h5>
+                            <p class="mb-0">Datos crudos generados (CSV)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="architecture-step">
+                            <h5>Bronze Layer</h5>
+                            <p class="mb-0">Datos crudos<br>33K filas</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="architecture-step">
+                            <h5>Silver Layer</h5>
+                            <p class="mb-0">Limpieza y validación<br>Datos normalizados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="architecture-step">
+                            <h5>Gold Layer</h5>
+                            <p class="mb-0">Features ML<br>76K filas, 22 features</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="architecture-step">
+                            <h5>Modelos de Machine Learning</h5>
+                            <p class="mb-0">XGBoost (Churn) + K-Means (Clustering)</p>
+                        </div>
+                        <div class="architecture-step">
+                            <h5>Dashboards Looker Studio</h5>
+                            <p class="mb-0">Visualización interactiva de resultados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboards -->
+    <section id="dashboards">
+        <div class="container">
+            <h2 class="section-title text-center">Dashboards Interactivos</h2>
+            <p class="section-subtitle text-center">
+                Explora los resultados del análisis y los modelos de ML en tiempo real
+            </p>
+            
+            <!-- Dashboard 1 -->
+            <div class="dashboard-container">
+                <h3 class="mb-4"><i class="bi bi-graph-up"></i> Dashboard 1: Análisis Exploratorio</h3>
+                <p class="text-muted">Evolución de ventas, distribución de clientes por perfil, estacionalidad y métricas clave del negocio.</p>
+                <iframe 
+                    class="dashboard-embed" 
+                    src="https://lookerstudio.google.com/embed/reporting/d1530021-0b09-4ebd-b1f0-b7a5d1bc01f6/page/ADGkF"
+                    frameborder="0" 
+                    style="border:0"
+                    allowfullscreen 
+                    sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+                </iframe>
+                <div class="text-center mt-3">
+                    <a href="https://lookerstudio.google.com/s/lNP23Pd1JMU" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver Dashboard Completo
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Dashboard 2 -->
+            <div class="dashboard-container">
+                <h3 class="mb-4"><i class="bi bi-cpu"></i> Dashboard 2: Modelo de Predicción de Churn</h3>
+                <p class="text-muted">Métricas del modelo XGBoost, distribución de predicciones, clientes en riesgo y feature importance.</p>
+                <iframe 
+                    class="dashboard-embed" 
+                    src="https://lookerstudio.google.com/embed/reporting/b8119522-85fb-42c1-92e8-af31a6f17cad/page/X6IkF"
+                    frameborder="0" 
+                    style="border:0"
+                    allowfullscreen 
+                    sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+                </iframe>
+                <div class="text-center mt-3">
+                    <a href="https://lookerstudio.google.com/s/j6fhzZ-un2U" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver Dashboard Completo
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Dashboard 3 -->
+            <div class="dashboard-container">
+                <h3 class="mb-4"><i class="bi bi-diagram-3"></i> Dashboard 3: Segmentación de Clientes</h3>
+                <p class="text-muted">Clustering K-Means: 5 segmentos identificados con características distintivas y recomendaciones de negocio.</p>
+                <iframe 
+                    class="dashboard-embed" 
+                    src="https://lookerstudio.google.com/embed/reporting/9b6cfced-a7bd-455b-b100-1ebf5536a57b/page/32LkF"
+                    frameborder="0" 
+                    style="border:0"
+                    allowfullscreen 
+                    sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+                </iframe>
+                <div class="text-center mt-3">
+                    <a href="https://lookerstudio.google.com/s/mo997cz-ISs" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i> Ver Dashboard Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="resultados" class="bg-light-custom">
+        <div class="container">
+            <h2 class="section-title text-center">Resultados y Hallazgos</h2>
+            <p class="section-subtitle text-center">
+                Insights clave del análisis y recomendaciones accionables para el negocio
+            </p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="result-card">
+                        <h4><i class="bi bi-trophy"></i> Modelo de Churn (XGBoost)</h4>
+                        <ul>
+                            <li><strong>ROC-AUC:</strong> 77.5% - Muy buena capacidad predictiva</li>
+                            <li><strong>Precision:</strong> 81.7% - Alta confianza en predicciones positivas</li>
+                            <li><strong>Recall:</strong> 80.7% - Detecta 8 de cada 10 casos de churn</li>
+                            <li><strong>Feature más importante:</strong> Días desde última compra (52 weight)</li>
+                            <li><strong>Clientes en riesgo:</strong> 979 en nivel ALTO/MUY_ALTO</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="result-card">
+                        <h4><i class="bi bi-people"></i> Segmentación (K-Means)</h4>
+                        <ul>
+                            <li><strong>VIP/Champions (8.5%):</strong> €3,474/6m - Retener con programa exclusivo</li>
+                            <li><strong>Activos (15.3%):</strong> €1,609/6m - Convertir a VIP con cross-sell</li>
+                            <li><strong>Ocasionales (45%):</strong> Potencial de mejora con campañas</li>
+                            <li><strong>En Riesgo (31%):</strong> €168/6m - Win-back urgente</li>
+                            <li><strong>Insight clave:</strong> 31% de clientes requieren atención inmediata</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="result-card">
+                        <h4><i class="bi bi-lightbulb"></i> Recomendaciones de Negocio</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>1. Campaña de Retención Proactiva:</strong><br>
+                                Activar alertas automáticas cuando un cliente supere 90 días sin comprar (predictor #1 de churn).</p>
+                                
+                                <p><strong>2. Programa VIP Diferenciado:</strong><br>
+                                Los 417 clientes VIP generan €1.4M (30% de ingresos). Crear beneficios exclusivos para retenerlos.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>3. Win-Back Campaign:</strong><br>
+                                1,521 clientes en riesgo (31%). Recuperar solo el 20% añadiría €60K en 6 meses.</p>
+                                
+                                <p><strong>4. Estacionalidad:</strong><br>
+                                Q4 tiene menor churn. Concentrar esfuerzos de activación en Q1-Q3.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Código -->
+    <section id="codigo">
+        <div class="container text-center">
+            <h2 class="section-title">Código y Documentación</h2>
+            <p class="section-subtitle">
+                Todo el código SQL, notebooks Python y documentación técnica disponible en GitHub
+            </p>
+            
+            <a href="https://github.com/AnaBMo/churn-prediction-mlops" target="_blank" class="code-link">
+                <i class="bi bi-github"></i>
+                Ver Repositorio en GitHub
+            </a>
+            
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-file-code" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        <h5 class="mt-3">Código SQL</h5>
+                        <p class="text-muted">Queries organizadas por capa: Bronze, Silver, Gold, ML</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-journal-code" style="font-size: 3rem; color: var(--secondary-color);"></i>
+                        <h5 class="mt-3">Notebook Python</h5>
+                        <p class="text-muted">Generación de datos sintéticos realistas</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <i class="bi bi-book" style="font-size: 3rem; color: var(--success-color);"></i>
+                        <h5 class="mt-3">Documentación</h5>
+                        <p class="text-muted">README completo con instrucciones de reproducción</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Proyecto MLOps - Predicción de Churn</h5>
+                    <p class="sign">Desarrollado por Ana Morales</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5>Contacto</h5>
+                    <p>
+                        <a href="https://github.com/AnaBMo" target="_blank"><i class="bi bi-github"></i> GitHub</a> |
+                        <a href="https://linkedin.com/in/tu-perfil" target="_blank"><i class="bi bi-linkedin"></i> LinkedIn</a>
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+            <div class="sign">
+                <p>&copy; 2025 Ana Morales. Proyecto educativo con datos sintéticos.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
