@@ -1,7 +1,7 @@
 # 🎯 Predicción de Churn de Clientes - Proyecto MLOps End-to-End
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-success)](https://anabmo.github.io/churn-prediction-mlops/)
-[![BigQuery ML](https://img.shields.io/badge/BigQuery-ML-blue)](https://cloud.google.com/bigquery-ml)
+[![BigQuery ML](https://img.shields.io/badge/BigQuery-ML-blue)](https://www.skills.google/course_templates/626?catalog_rank=%7B%22rank%22%3A5%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&search_id=66735415)
 [![Python](https://img.shields.io/badge/Python-3.10-green)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
